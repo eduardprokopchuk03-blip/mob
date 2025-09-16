@@ -222,21 +222,31 @@
             transform: scale(1.05);
         }
 
-        /* Коллаж */
-        .collage-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        /* Слайдер для коллажа */
+        .collage {
+            position: relative;
+        }
+
+        .slider-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 0;
             gap: 15px;
-            justify-items: center;
+        }
+
+        .slider-container::-webkit-scrollbar {
+            display: none; /* Убираем полосу прокрутки */
         }
 
         .collage-item {
-            width: 200px;
+            min-width: 200px;
             height: 240px;
             overflow: hidden;
             border-radius: 10px;
             transition: transform 0.3s ease;
-            position: relative;
+            flex-shrink: 0;
         }
 
         .collage-item img {
@@ -254,6 +264,32 @@
 
         .collage-item:hover {
             transform: scale(1.05);
+        }
+
+        /* Кнопки навигации для слайдера */
+        .nav-buttons {
+            display: none;
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            transform: translateY(-50%);
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .nav-btn {
+            background: rgba(0, 183, 235, 0.5);
+            border: none;
+            color: #1c1c1c;
+            padding: 5px 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 183, 235, 0.8);
         }
 
         /* Анимация для фонового эффекта */
@@ -274,34 +310,12 @@
             100% { transform: scale(1); opacity: 0.2; }
         }
 
-        /* Кнопки навигации для коллажа */
-        .nav-buttons {
-            display: none;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-
-        .nav-btn {
-            background: #00b7eb;
-            border: none;
-            color: #1c1c1c;
-            padding: 5px 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s ease;
-        }
-
-        .nav-btn:hover {
-            background: #ffffff;
-        }
-
         /* Адаптивность */
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.5rem;
                 padding: 20px;
-                margin-left: -25px; /* Сдвиг влево */
+                margin-left: -25px;
                 text-align: left;
             }
 
@@ -336,13 +350,13 @@
                 font-size: 1rem;
             }
 
-            .collage-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            .slider-container {
+                padding: 0 40px; /* Пространство для стрелок */
             }
 
             .collage-item {
-                width: 150px;
-                height: 180px;
+                min-width: 180px;
+                height: 220px;
             }
 
             .nav-buttons {
@@ -400,7 +414,7 @@
 
         <div class="collage" id="collage">
             <h2>Наши подростки</h2>
-            <div class="collage-grid">
+            <div class="slider-container">
                 <div class="collage-item"><img src="https://i.postimg.cc/B6SvmXqX/01.jpg" alt="Подросток 1"></div>
                 <div class="collage-item"><img src="https://i.postimg.cc/Vv5kcp0w/02.jpg" alt="Подросток 2"></div>
                 <div class="collage-item"><img src="https://i.postimg.cc/WzKbp80k/03.jpg" alt="Подросток 3"></div>
@@ -491,10 +505,10 @@
             }
         });
 
-        // Анимация для элементов коллажа
+        // Анимация для элементов слайдера
         gsap.utils.toArray(".collage-item").forEach((item, index) => {
             gsap.from(item, {
-                scale: 0.8,
+                x: -50,
                 opacity: 0,
                 duration: 0.8,
                 delay: index * 0.1,
@@ -517,10 +531,10 @@
             });
         });
 
-        // Функция для прокрутки коллажа
+        // Функция для прокрутки слайдера
         function scrollCollage(direction) {
-            const container = document.querySelector('.collage-grid');
-            const scrollAmount = direction * 150; // Шаг прокрутки
+            const container = document.querySelector('.slider-container');
+            const scrollAmount = direction * 200; // Шаг прокрутки
             container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         }
     </script>
