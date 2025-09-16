@@ -222,21 +222,40 @@
             transform: scale(1.05);
         }
 
-        /* Коллаж */
-        .collage-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        /* Слайдер для коллажа */
+        .collage {
+            overflow: hidden;
+        }
+
+        .slider-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 0;
             gap: 15px;
-            justify-items: center;
+        }
+
+        .slider-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .slider-container::-webkit-scrollbar-thumb {
+            background-color: #00b7eb;
+            border-radius: 4px;
+        }
+
+        .slider-container::-webkit-scrollbar-track {
+            background: #1c1c1c;
         }
 
         .collage-item {
-            width: 200px;
+            min-width: 200px;
             height: 240px;
             overflow: hidden;
             border-radius: 10px;
             transition: transform 0.3s ease;
-            position: relative;
+            flex-shrink: 0;
         }
 
         .collage-item img {
@@ -279,7 +298,7 @@
             .header h1 {
                 font-size: 2.5rem;
                 padding: 20px;
-                margin-left: -20px; /* Сдвиг влево для центрирования */
+                margin-left: -25px; /* Ещё чуть левее */
                 text-align: left;
             }
 
@@ -315,8 +334,8 @@
             }
 
             .collage-item {
-                width: 150px;
-                height: 180px;
+                min-width: 180px;
+                height: 220px;
             }
         }
     </style>
@@ -370,7 +389,7 @@
 
         <div class="collage" id="collage">
             <h2>Наши подростки</h2>
-            <div class="collage-grid">
+            <div class="slider-container">
                 <div class="collage-item"><img src="https://i.postimg.cc/B6SvmXqX/01.jpg" alt="Подросток 1"></div>
                 <div class="collage-item"><img src="https://i.postimg.cc/Vv5kcp0w/02.jpg" alt="Подросток 2"></div>
                 <div class="collage-item"><img src="https://i.postimg.cc/WzKbp80k/03.jpg" alt="Подросток 3"></div>
@@ -457,10 +476,10 @@
             }
         });
 
-        // Анимация для элементов коллажа
+        // Анимация для элементов слайдера
         gsap.utils.toArray(".collage-item").forEach((item, index) => {
             gsap.from(item, {
-                scale: 0.8,
+                x: -50,
                 opacity: 0,
                 duration: 0.8,
                 delay: index * 0.1,
