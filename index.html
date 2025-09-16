@@ -222,45 +222,21 @@
             transform: scale(1.05);
         }
 
-        /* Слайдер для коллажа */
-        .collage {
-            overflow: hidden;
-        }
-
-        .slider-container {
-            display: flex;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            padding: 10px 0;
+        /* Коллаж */
+        .collage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            cursor: grab;
-        }
-
-        .slider-container:active {
-            cursor: grabbing;
-        }
-
-        .slider-container::-webkit-scrollbar {
-            height: 4px; /* Уменьшена полоса прокрутки */
-        }
-
-        .slider-container::-webkit-scrollbar-thumb {
-            background-color: #00b7eb;
-            border-radius: 2px;
-        }
-
-        .slider-container::-webkit-scrollbar-track {
-            background: #1c1c1c;
+            justify-items: center;
         }
 
         .collage-item {
-            min-width: 150px;
-            height: 180px;
+            width: 200px;
+            height: 240px;
             overflow: hidden;
             border-radius: 10px;
             transition: transform 0.3s ease;
-            flex-shrink: 0;
+            position: relative;
         }
 
         .collage-item img {
@@ -302,9 +278,15 @@
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.5rem;
+                padding-right: 30px; /* Рамка выходит справа */
             }
 
-            .header p, .info h2, .guests h2, .schedule h2, .contact h2, .collage h2 {
+            .header p {
+                font-size: 1.5rem;
+                text-align: center; /* Подпись отцентрирована */
+            }
+
+            .info h2, .guests h2, .schedule h2, .contact h2, .collage h2 {
                 font-size: 1.5rem;
             }
 
@@ -330,20 +312,9 @@
                 font-size: 1rem;
             }
 
-            .header {
-                padding-left: 20px;
-                text-align: left;
-            }
-
-            .header h1 {
-                margin-left: -10px;
-                width: 100%;
-                box-sizing: border-box;
-            }
-
             .collage-item {
-                min-width: 120px;
-                height: 150px;
+                width: 150px;
+                height: 180px;
             }
         }
     </style>
@@ -397,7 +368,7 @@
 
         <div class="collage" id="collage">
             <h2>Наши подростки</h2>
-            <div class="slider-container">
+            <div class="collage-grid">
                 <div class="collage-item"><img src="https://i.postimg.cc/B6SvmXqX/01.jpg" alt="Подросток 1"></div>
                 <div class="collage-item"><img src="https://i.postimg.cc/Vv5kcp0w/02.jpg" alt="Подросток 2"></div>
                 <div class="collage-item"><img src="https://i.postimg.cc/WzKbp80k/03.jpg" alt="Подросток 3"></div>
@@ -484,10 +455,10 @@
             }
         });
 
-        // Анимация для элементов слайдера
+        // Анимация для элементов коллажа
         gsap.utils.toArray(".collage-item").forEach((item, index) => {
             gsap.from(item, {
-                x: -50,
+                scale: 0.8,
                 opacity: 0,
                 duration: 0.8,
                 delay: index * 0.1,
@@ -509,40 +480,6 @@
                 targetElement.scrollIntoView({ behavior: 'smooth' });
             });
         });
-
-        // Пролистывание слайдера мышью
-        let isDragging = false;
-        let startPos = 0;
-        let currentTranslate = 0;
-        let prevTranslate = 0;
-
-        const slider = document.querySelector('.slider-container');
-
-        slider.addEventListener('mousedown', startDragging);
-        slider.addEventListener('mousemove', drag);
-        slider.addEventListener('mouseup', stopDragging);
-        slider.addEventListener('mouseleave', stopDragging);
-
-        function startDragging(e) {
-            isDragging = true;
-            startPos = e.clientX;
-            slider.style.cursor = 'grabbing';
-        }
-
-        function drag(e) {
-            if (isDragging) {
-                const currentPos = e.clientX;
-                const diff = currentPos - startPos;
-                currentTranslate = prevTranslate + diff;
-                slider.style.transform = `translateX(${currentTranslate}px)`;
-            }
-        }
-
-        function stopDragging() {
-            isDragging = false;
-            prevTranslate = currentTranslate;
-            slider.style.cursor = 'grab';
-        }
     </script>
 </body>
 </html>
