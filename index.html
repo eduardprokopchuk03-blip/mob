@@ -1,0 +1,489 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Приглашение на праздник</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Playfair Display', serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Навигационное меню */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(20, 20, 20, 0.9);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            padding: 15px 0;
+            opacity: 0;
+            transform: translateY(-100%) rotateX(-10deg);
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .navbar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            color: #00b7eb;
+        }
+
+        .header {
+            text-align: center;
+            padding: 100px 20px 80px;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            padding: 20px;
+            display: inline-block;
+            border-bottom: 3px solid #00b7eb;
+            box-shadow: 0 0 5px #00b7eb, 0 0 10px #00b7eb;
+            border-radius: 10px;
+            background: transparent;
+        }
+
+        .header p {
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .info, .guests, .schedule, .contact, .collage {
+            margin: 60px 0;
+            padding: 50px;
+            background: rgba(20, 20, 20, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(50px);
+            text-align: center;
+        }
+
+        .info h2, .guests h2, .schedule h2, .contact h2, .collage h2 {
+            font-size: 2rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .info p.date {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        .info p.address {
+            font-size: 1.3rem;
+            margin: 10px 0;
+        }
+
+        .guests ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .guests li {
+            font-size: 1.2rem;
+            color: #ffffff;
+            padding: 10px 10px 10px 30px;
+            width: 400px;
+            text-align: left;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .guests li::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: #00b7eb;
+            border-radius: 50%;
+        }
+
+        .guests li:hover {
+            transform: translateX(10px);
+        }
+
+        .schedule p {
+            font-size: 1.3rem;
+            margin: 10px 0;
+        }
+
+        .contact p {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .contact a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact a:hover {
+            color: #00b7eb;
+        }
+
+        .contact-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #00b7eb;
+            color: #1c1c1c;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .contact-button:hover {
+            background: #ffffff;
+            color: #1c1c1c;
+            transform: scale(1.05);
+        }
+
+        /* Коллаж */
+        .collage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            justify-items: center;
+        }
+
+        .collage-item {
+            width: 200px;
+            height: 240px;
+            overflow: hidden;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .collage-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: 50% 0;
+        }
+
+        .collage-item:nth-child(6) img,
+        .collage-item:nth-child(8) img,
+        .collage-item:nth-child(10) img {
+            object-position: 50% 20%;
+        }
+
+        .collage-item:hover {
+            transform: scale(1.05);
+        }
+
+        /* Анимация для фонового эффекта */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle, rgba(0, 183, 235, 0.1), transparent);
+            animation: pulse 10s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.2; }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .header p, .info h2, .guests h2, .schedule h2, .contact h2, .collage h2 {
+                font-size: 1.5rem;
+            }
+
+            .info p.date {
+                font-size: 1.8rem;
+            }
+
+            .guests li {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .info, .guests, .schedule, .contact, .collage {
+                padding: 30px;
+                margin: 40px 0;
+            }
+
+            .navbar ul {
+                gap: 15px;
+            }
+
+            .navbar a {
+                font-size: 1rem;
+            }
+
+            .collage-item {
+                width: 150px;
+                height: 180px;
+            }
+
+            .header {
+                padding-left: 20px; /* Смещение влево */
+                text-align: left; /* Выравнивание текста влево */
+            }
+
+            .header h1 {
+                margin-left: -20px; /* Чуть левее центра */
+                width: 90%; /* Ограничение ширины */
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <nav class="navbar">
+        <ul>
+            <li><a href="#header">Главная</a></li>
+            <li><a href="#info">Детали</a></li>
+            <li><a href="#guests">Гости</a></li>
+            <li><a href="#schedule">Расписание</a></li>
+            <li><a href="#contact">Контакты</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="header" id="header">
+            <h1>Дорогие родители! Приглашаем вас на праздник!</h1>
+            <p>Этот день будет посвящен переводу из подростков в молодёжь</p>
+        </div>
+
+        <div class="info" id="info">
+            <h2>Детали мероприятия</h2>
+            <p class="date"><strong>Дата:</strong> 5 октября</p>
+            <p class="address"><strong>Адрес:</strong> г. Ростов-на-Дону, ул. 3 Лазерная, 128</p>
+        </div>
+
+        <div class="guests" id="guests">
+            <h2>Самые родные гости</h2>
+            <ul>
+                <li>Морозов Игорь и Морозова Наталья</li>
+                <li>Евлахова Наталья</li>
+                <li>Поясков Павел и Пояскова Надежда</li>
+                <li>Широков Евгений и Широкова Лидия</li>
+                <li>Богданов Дмитрий и Богданова Галина</li>
+                <li>Богданов Андрей и Богданова Ирина</li>
+                <li>Гончарук Дмитрий и Гончарук Анна</li>
+                <li>Савченко Андрей и Савченко Герли</li>
+                <li>Бублик Андрей и Бублик Ксюша</li>
+                <li>Кривцова Марина</li>
+            </ul>
+        </div>
+
+        <div class="schedule" id="schedule">
+            <h2>Расписание</h2>
+            <p>11:00 — Первая часть</p>
+            <p>18:00 — Вторая часть</p>
+        </div>
+
+        <div class="collage" id="collage">
+            <h2>Наши подростки</h2>
+            <div class="collage-grid">
+                <div class="collage-item"><img src="https://i.postimg.cc/B6SvmXqX/01.jpg" alt="Подросток 1"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/Vv5kcp0w/02.jpg" alt="Подросток 2"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/WzKbp80k/03.jpg" alt="Подросток 3"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/KYNG3xnF/04.jpg" alt="Подросток 4"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/wvwjZgvF/05.jpg" alt="Подросток 5"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/dQS09sgV/06.jpg" alt="Подросток 6"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/FsdHCtQg/07.jpg" alt="Подросток 7"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/HxvT3zZh/08.png" alt="Подросток 8"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/PrgrB6XG/09.jpg" alt="Подросток 9"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/kgWX9xG2/10.jpg" alt="Подросток 10"></div>
+            </div>
+        </div>
+
+        <div class="contact" id="contact">
+            <h2>Свяжитесь с нами</h2>
+            <p>По всем вопросам: Алексей <a href="tel:+79094021340">+7 909 402 1340</a></p>
+            <a href="tel:+79094021340" class="contact-button">Позвонить</a>
+        </div>
+    </div>
+
+    <script>
+        // Анимации с использованием GSAP
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Анимация для навигации
+        gsap.to(".navbar", {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            duration: 1.2,
+            ease: "power3.out",
+            transformOrigin: "top center"
+        });
+
+        // Анимация для заголовка
+        gsap.to(".header", {
+            opacity: 1,
+            y: 0,
+            duration: 1.5,
+            ease: "power3.out"
+        });
+
+        // Анимация для секций
+        gsap.utils.toArray(".info, .guests, .schedule, .collage, .contact").forEach(section => {
+            gsap.to(section, {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // Анимация для элементов списка гостей
+        gsap.utils.toArray(".guests li").forEach((guest, index) => {
+            gsap.from(guest, {
+                x: -50,
+                opacity: 0,
+                duration: 0.8,
+                delay: index * 0.1,
+                ease: "back.out(1.7)",
+                scrollTrigger: {
+                    trigger: ".guests",
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // Анимация для кнопки "Позвонить"
+        gsap.from(".contact-button", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.8,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+                trigger: ".contact",
+                start: "top 80%",
+                toggleActions: "play none none none"
+            }
+        });
+
+        // Анимация для элементов коллажа
+        gsap.utils.toArray(".collage-item").forEach((item, index) => {
+            gsap.from(item, {
+                scale: 0.8,
+                opacity: 0,
+                duration: 0.8,
+                delay: index * 0.1,
+                ease: "back.out(1.7)",
+                scrollTrigger: {
+                    trigger: ".collage",
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // Плавная прокрутка при клике на навигацию
+        document.querySelectorAll('.navbar a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
