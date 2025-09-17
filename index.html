@@ -1,8 +1,47 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Приглашение на праздник</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -20,17 +59,6 @@
             line-height: 1.6;
         }
 
-        /* Фикс, чтобы страница не увеличивалась на телефоне */
-        html, body {
-            overscroll-behavior: none;
-            touch-action: manipulation;
-        }
-
-        /* Минимальный шрифт, чтобы Safari не увеличивал */
-        input, select, textarea, a {
-            font-size: 16px !important;
-        }
-
         body::before {
             content: '';
             position: fixed;
@@ -39,7 +67,7 @@
             width: 100%;
             height: 100%;
             background: url('https://i.postimg.cc/ZqsKg16F/image.png') no-repeat center center/cover;
-            filter: blur(2px);
+            filter: blur(2px); /* Размытие только фона */
             z-index: -1;
         }
 
@@ -51,7 +79,7 @@
             z-index: 1;
         }
 
-        /* Навигация */
+        /* Навигационное меню */
         .navbar {
             position: fixed;
             top: 0;
@@ -84,7 +112,7 @@
             color: #00b7eb;
         }
 
-        /* Бургер-меню */
+        /* Бургер-меню для мобильных */
         .menu-toggle {
             display: none;
             font-size: 1.5rem;
@@ -94,7 +122,9 @@
         }
 
         @media (max-width: 768px) {
-            .menu-toggle { display: block; }
+            .menu-toggle {
+                display: block;
+            }
             .navbar ul {
                 display: none;
                 flex-direction: column;
@@ -105,7 +135,9 @@
                 background: rgba(20, 20, 20, 0.9);
                 padding: 20px 0;
             }
-            .navbar ul.active { display: flex; }
+            .navbar ul.active {
+                display: flex;
+            }
             .navbar a {
                 font-size: 1.3rem;
                 padding: 10px 20px;
@@ -120,6 +152,7 @@
 
         .header h1 {
             font-size: 2.5rem;
+            text-transform: uppercase;
             letter-spacing: 1px;
             color: #ffffff;
             margin-bottom: 15px;
@@ -128,6 +161,7 @@
             border-bottom: 2px solid #ffffff;
             box-shadow: 0 0 4px #ffffff, 0 0 8px #ffffff;
             border-radius: 8px;
+            background: transparent;
             font-weight: 700;
         }
 
@@ -137,6 +171,32 @@
             border-radius: 12px;
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
             text-align: center;
+        }
+
+        .info h2, .schedule h2, .contact h2 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .guests h2 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .info p.date {
+            font-size: 1.6rem;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .info p.address {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            font-weight: 500;
         }
 
         .guests ul {
@@ -155,6 +215,8 @@
             max-width: 250px;
             text-align: left;
             position: relative;
+            transition: transform 0.3s ease;
+            font-weight: 400;
         }
 
         .guests li::before {
@@ -169,27 +231,147 @@
             border-radius: 50%;
         }
 
-        /* Кнопка в стиле Apple */
+        .guests li:hover {
+            transform: translateX(8px);
+        }
+
+        .schedule p {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .contact p {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .contact a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact a:hover {
+            color: #00b7eb;
+        }
+
         .contact-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 28px;
+            display: inline-block;
+            padding: 10px 25px;
             background: #ffffff;
             color: #1c1c1c;
-            font-size: 1.1rem;
-            font-weight: 600;
             text-decoration: none;
-            border-radius: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 500;
             transition: all 0.3s ease;
         }
 
         .contact-button:hover {
-            background: #f2f2f2;
+            background: #00b7eb;
+            color: #ffffff;
             transform: scale(1.05);
         }
+
+        /* Коллаж */
+        .collage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            justify-items: center;
+        }
+
+        .collage-item {
+            width: 150px;
+            height: 180px;
+            overflow: hidden;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .collage-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: 50% 0;
+        }
+
+        .collage-item:nth-child(6) img,
+        .collage-item:nth-child(8) img,
+        .collage-item:nth-child(10) img {
+            object-position: 50% 20%;
+        }
+
+        .collage-item:hover {
+            transform: scale(1.05);
+        }
+
+        /* Анимация для фонового эффекта */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle, rgba(0, 183, 235, 0.1), transparent);
+            animation: pulse 10s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.2; }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+                padding: 10px;
+                margin-left: 0;
+                text-align: center;
+            }
+
+            .info h2, .guests h2, .schedule h2, .contact h2 {
+                font-size: 1.5rem;
+            }
+
+            .info p.date {
+                font-size: 1.4rem;
+            }
+
+            .guests li {
+                max-width: 100%;
+                font-size: 1rem;
+                padding: 6px 6px 6px 20px;
+            }
+
+            .info, .guests, .schedule, .contact, .collage {
+                padding: 20px;
+                margin: 30px 0;
+            }
+
+            .collage-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .collage-item {
+                width: 120px;
+                height: 140px;
+            }
+
+            .contact-button {
+                font-size: 1rem;
+                padding: 8px 20px;
+            }
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 </head>
 <body>
     <div class="bg-animation"></div>
@@ -203,7 +385,6 @@
             <li><a href="#contact">Контакты</a></li>
         </ul>
     </nav>
-
     <div class="container">
         <div class="header" id="header">
             <h1>Дорогие родители! Приглашаем вас на праздник!</h1>
@@ -237,11 +418,144 @@
             <p>18:00 — Вторая часть</p>
         </div>
 
+        <div class="collage" id="collage">
+            <div class="collage-grid">
+                <div class="collage-item"><img src="https://i.postimg.cc/B6SvmXqX/01.jpg" alt="Подросток 1"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/Vv5kcp0w/02.jpg" alt="Подросток 2"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/WzKbp80k/03.jpg" alt="Подросток 3"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/KYNG3xnF/04.jpg" alt="Подросток 4"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/wvwjZgvF/05.jpg" alt="Подросток 5"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/dQS09sgV/06.jpg" alt="Подросток 6"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/FsdHCtQg/07.jpg" alt="Подросток 7"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/HxvT3zZh/08.png" alt="Подросток 8"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/PrgrB6XG/09.jpg" alt="Подросток 9"></div>
+                <div class="collage-item"><img src="https://i.postimg.cc/kgWX9xG2/10.jpg" alt="Подросток 10"></div>
+            </div>
+        </div>
+
         <div class="contact" id="contact">
             <h2>Свяжитесь с нами</h2>
             <p>По всем вопросам:<br>Алексей <a href="tel:+79094021340">+7 909 402 1340</a></p>
-            <a href="tel:+79094021340" class="contact-button">📞 Позвонить</a>
         </div>
     </div>
+
+    <script>
+        // Анимации с использованием GSAP
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Анимация для навигации
+        gsap.to(".navbar", {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            duration: 1.2,
+            ease: "power3.out",
+            transformOrigin: "top center"
+        });
+
+        // Анимация для заголовка (появление слева направо)
+        gsap.from(".header", {
+            opacity: 0,
+            x: -100,
+            duration: 1.5,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".header",
+                start: "top 80%",
+                toggleActions: "play none none none"
+            }
+        });
+
+        // Анимация для секции "Самые родные гости" (появление слева направо)
+        gsap.from(".guests", {
+            opacity: 0,
+            x: -100,
+            duration: 1.5,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".guests",
+                start: "top 80%",
+                toggleActions: "play none none none"
+            }
+        });
+
+        // Анимация для секций
+        gsap.utils.toArray(".info, .schedule, .collage, .contact").forEach(section => {
+            gsap.from(section, {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // Анимация для элементов списка гостей
+        gsap.utils.toArray(".guests li").forEach((guest, index) => {
+            gsap.from(guest, {
+                x: -50,
+                opacity: 0,
+                duration: 0.8,
+                delay: index * 0.1,
+                ease: "back.out(1.7)",
+                scrollTrigger: {
+                    trigger: ".guests",
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // Анимация для кнопки "Позвонить"
+        gsap.from(".contact-button", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.8,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+                trigger: ".contact",
+                start: "top 80%",
+                toggleActions: "play none none none"
+            }
+        });
+
+        // Анимация для элементов коллажа
+        gsap.utils.toArray(".collage-item").forEach((item, index) => {
+            gsap.from(item, {
+                scale: 0.8,
+                opacity: 0,
+                duration: 0.8,
+                delay: index * 0.1,
+                ease: "back.out(1.7)",
+                scrollTrigger: {
+                    trigger: ".collage",
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // Плавная прокрутка при клике на навигацию
+        document.querySelectorAll('.navbar a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.navbar ul').classList.remove('active');
+                }
+            });
+        });
+
+        // Бургер-меню
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.navbar ul').classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
