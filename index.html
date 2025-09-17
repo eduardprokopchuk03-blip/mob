@@ -41,7 +41,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Приглашение на праздник</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -57,17 +57,20 @@
             color: #ffffff;
             overflow-x: hidden;
             line-height: 1.6;
+            -webkit-overflow-scrolling: touch;
+            height: 100vh; /* Фиксируем высоту */
+            overflow-y: auto; /* Плавная прокрутка */
         }
 
         body::before {
             content: '';
-            position: fixed;
+            position: absolute; /* Изменим с fixed на absolute для мобильных */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://i.postimg.cc/ZqsKg16F/image.png') no-repeat center center/cover;
-            filter: blur(2px); /* Размытие только фона */
+            background: url('https://i.postimg.cc/qBthLYJs/image.png') no-repeat center center/cover;
+            filter: blur(2px);
             z-index: -1;
         }
 
@@ -243,8 +246,7 @@
 
         .contact p {
             font-size: 1.1rem;
-            margin-bottom: 15px;
-            font-weight: 500;
+            margin-bottom: 30px; /* Увеличенный отступ для кнопки на мобильных */
         }
 
         .contact a {
@@ -260,18 +262,21 @@
         .contact-button {
             display: inline-block;
             padding: 10px 25px;
-            background: #ffffff;
-            color: #1c1c1c;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
             text-decoration: none;
             border-radius: 20px;
             font-size: 1.1rem;
             font-weight: 500;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             transition: all 0.3s ease;
         }
 
         .contact-button:hover {
-            background: #00b7eb;
-            color: #ffffff;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
             transform: scale(1.05);
         }
 
@@ -364,9 +369,14 @@
                 height: 140px;
             }
 
+            .contact p {
+                margin-bottom: 40px; /* Ещё ниже для кнопки */
+            }
+
             .contact-button {
                 font-size: 1rem;
                 padding: 8px 20px;
+                display: inline-block; /* Убеждаемся, что кнопка видна */
             }
         }
     </style>
@@ -435,7 +445,8 @@
 
         <div class="contact" id="contact">
             <h2>Свяжитесь с нами</h2>
-            <p>По всем вопросам:<br>Алексей <a href="tel:+79094021340">+7 909 402 1340</a></p>
+            <p>По всем вопросам:<br>Алексей <a href="tel:+79094021340" style="color: #ffffff;">+7 909 402 1340</a></p>
+            <a href="tel:+79094021340" class="contact-button">📞 Позвонить</a>
         </div>
     </div>
 
