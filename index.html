@@ -58,17 +58,17 @@
             overflow-x: hidden;
             line-height: 1.6;
             -webkit-overflow-scrolling: touch;
-            height: 100vh; /* Фиксируем высоту */
-            overflow-y: auto; /* Плавная прокрутка */
+            min-height: 100vh; /* Минимальная высота экрана */
+            touch-action: pan-y; /* Ограничиваем зум при скролле вниз */
         }
 
         body::before {
             content: '';
-            position: absolute; /* Изменим с fixed на absolute для мобильных */
+            position: fixed; /* Возвращаем fixed для полного покрытия */
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 100%; /* Покрываем всю видимую область */
             background: url('https://i.postimg.cc/qBthLYJs/image.png') no-repeat center center/cover;
             filter: blur(2px);
             z-index: -1;
@@ -246,7 +246,7 @@
 
         .contact p {
             font-size: 1.1rem;
-            margin-bottom: 30px; /* Увеличенный отступ для кнопки на мобильных */
+            margin-bottom: 30px;
         }
 
         .contact a {
@@ -370,13 +370,12 @@
             }
 
             .contact p {
-                margin-bottom: 40px; /* Ещё ниже для кнопки */
+                margin-bottom: 40px;
             }
 
             .contact-button {
                 font-size: 1rem;
                 padding: 8px 20px;
-                display: inline-block; /* Убеждаемся, что кнопка видна */
             }
         }
     </style>
