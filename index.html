@@ -43,25 +43,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Приглашение на праздник</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Playfair Display', serif;
+            font-family: 'Montserrat', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+            background: linear-gradient(rgba(15, 15, 15, 0.95), rgba(28, 28, 28, 0.95));
             color: #ffffff;
             overflow-x: hidden;
             line-height: 1.6;
         }
 
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://i.postimg.cc/qBthLYJs/image.png') no-repeat center center/cover;
+            filter: blur(2px); /* Размытие только фона */
+            z-index: -1;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 30px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         /* Навигационное меню */
@@ -82,7 +97,7 @@
             list-style: none;
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 20px;
         }
 
         .navbar a {
@@ -97,57 +112,91 @@
             color: #00b7eb;
         }
 
+        /* Бургер-меню для мобильных */
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            .navbar ul {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background: rgba(20, 20, 20, 0.9);
+                padding: 20px 0;
+            }
+            .navbar ul.active {
+                display: flex;
+            }
+            .navbar a {
+                font-size: 1.3rem;
+                padding: 10px 20px;
+                text-align: center;
+            }
+        }
+
         .header {
             text-align: center;
-            padding: 100px 20px 80px;
-            opacity: 0;
-            transform: translateY(50px);
+            padding: 80px 20px 60px;
         }
 
         .header h1 {
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             color: #ffffff;
-            margin-bottom: 20px;
-            padding: 20px;
+            margin-bottom: 15px;
+            padding: 15px;
             display: inline-block;
-            border-bottom: 3px solid #00b7eb;
-            box-shadow: 0 0 5px #00b7eb, 0 0 10px #00b7eb;
-            border-radius: 10px;
+            border-bottom: 2px solid #ffffff;
+            box-shadow: 0 0 4px #ffffff, 0 0 8px #ffffff;
+            border-radius: 8px;
             background: transparent;
-        }
-
-        .header p {
-            font-size: 1.5rem;
-            color: #ffffff;
+            font-weight: 700;
         }
 
         .info, .guests, .schedule, .contact, .collage {
-            margin: 60px 0;
-            padding: 50px;
-            background: rgba(20, 20, 20, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transform: translateY(50px);
+            margin: 40px 0;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
             text-align: center;
         }
 
-        .info h2, .guests h2, .schedule h2, .contact h2, .collage h2 {
-            font-size: 2rem;
+        .info h2, .schedule h2, .contact h2 {
+            font-size: 1.8rem;
             color: #ffffff;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .guests h2 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-weight: 700;
         }
 
         .info p.date {
-            font-size: 2rem;
+            font-size: 1.6rem;
             margin: 10px 0;
+            font-weight: 500;
         }
 
         .info p.address {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             margin: 10px 0;
+            font-weight: 500;
         }
 
         .guests ul {
@@ -155,43 +204,47 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
 
         .guests li {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #ffffff;
-            padding: 10px 10px 10px 30px;
-            width: 400px;
+            padding: 8px 8px 8px 25px;
+            width: 100%;
+            max-width: 250px;
             text-align: left;
             position: relative;
             transition: transform 0.3s ease;
+            font-weight: 400;
         }
 
         .guests li::before {
             content: '';
             position: absolute;
-            left: 10px;
+            left: 8px;
             top: 50%;
             transform: translateY(-50%);
-            width: 8px;
-            height: 8px;
-            background: #00b7eb;
+            width: 6px;
+            height: 6px;
+            background: #ffffff;
             border-radius: 50%;
         }
 
         .guests li:hover {
-            transform: translateX(10px);
+            transform: translateX(8px);
         }
 
         .schedule p {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             margin: 10px 0;
+            font-weight: 500;
         }
 
         .contact p {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 500;
         }
 
         .contact a {
@@ -206,35 +259,35 @@
 
         .contact-button {
             display: inline-block;
-            padding: 12px 30px;
-            background: #00b7eb;
+            padding: 10px 25px;
+            background: #ffffff;
             color: #1c1c1c;
             text-decoration: none;
-            border-radius: 25px;
-            font-size: 1.2rem;
+            border-radius: 20px;
+            font-size: 1.1rem;
             font-weight: 500;
             transition: all 0.3s ease;
         }
 
         .contact-button:hover {
-            background: #ffffff;
-            color: #1c1c1c;
+            background: #00b7eb;
+            color: #ffffff;
             transform: scale(1.05);
         }
 
         /* Коллаж */
         .collage-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
             justify-items: center;
         }
 
         .collage-item {
-            width: 200px;
-            height: 240px;
+            width: 150px;
+            height: 180px;
             overflow: hidden;
-            border-radius: 10px;
+            border-radius: 8px;
             transition: transform 0.3s ease;
             position: relative;
         }
@@ -277,50 +330,43 @@
         /* Адаптивность */
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 2.5rem;
-                padding: 20px;
-                margin-left: -20px;
-                text-align: left;
-            }
-
-            .header p {
-                font-size: 1.5rem;
+                font-size: 2rem;
+                padding: 10px;
+                margin-left: 0;
                 text-align: center;
             }
 
-            .info h2, .guests h2, .schedule h2, .contact h2, .collage h2 {
+            .info h2, .guests h2, .schedule h2, .contact h2 {
                 font-size: 1.5rem;
             }
 
             .info p.date {
-                font-size: 1.8rem;
+                font-size: 1.4rem;
             }
 
             .guests li {
-                width: 100%;
-                max-width: 300px;
+                max-width: 100%;
+                font-size: 1rem;
+                padding: 6px 6px 6px 20px;
             }
 
             .info, .guests, .schedule, .contact, .collage {
-                padding: 30px;
-                margin: 40px 0;
-            }
-
-            .navbar ul {
-                gap: 15px;
-            }
-
-            .navbar a {
-                font-size: 1rem;
+                padding: 20px;
+                margin: 30px 0;
             }
 
             .collage-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
 
             .collage-item {
-                width: 150px;
-                height: 180px;
+                width: 120px;
+                height: 140px;
+            }
+
+            .contact-button {
+                font-size: 1rem;
+                padding: 8px 20px;
             }
         }
     </style>
@@ -330,6 +376,7 @@
 <body>
     <div class="bg-animation"></div>
     <nav class="navbar">
+        <div class="menu-toggle">☰</div>
         <ul>
             <li><a href="#header">Главная</a></li>
             <li><a href="#info">Детали</a></li>
@@ -341,7 +388,6 @@
     <div class="container">
         <div class="header" id="header">
             <h1>Дорогие родители! Приглашаем вас на праздник!</h1>
-            <p>Этот день будет посвящен переводу из подростков в молодёжь</p>
         </div>
 
         <div class="info" id="info">
@@ -373,7 +419,6 @@
         </div>
 
         <div class="collage" id="collage">
-            <h2>Наши подростки</h2>
             <div class="collage-grid">
                 <div class="collage-item"><img src="https://i.postimg.cc/B6SvmXqX/01.jpg" alt="Подросток 1"></div>
                 <div class="collage-item"><img src="https://i.postimg.cc/Vv5kcp0w/02.jpg" alt="Подросток 2"></div>
@@ -391,7 +436,6 @@
         <div class="contact" id="contact">
             <h2>Свяжитесь с нами</h2>
             <p>По всем вопросам:<br>Алексей <a href="tel:+79094021340">+7 909 402 1340</a></p>
-            <a href="tel:+79094021340" class="contact-button">Позвонить</a>
         </div>
     </div>
 
@@ -409,19 +453,37 @@
             transformOrigin: "top center"
         });
 
-        // Анимация для заголовка
-        gsap.to(".header", {
-            opacity: 1,
-            y: 0,
+        // Анимация для заголовка (появление слева направо)
+        gsap.from(".header", {
+            opacity: 0,
+            x: -100,
             duration: 1.5,
-            ease: "power3.out"
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".header",
+                start: "top 80%",
+                toggleActions: "play none none none"
+            }
+        });
+
+        // Анимация для секции "Самые родные гости" (появление слева направо)
+        gsap.from(".guests", {
+            opacity: 0,
+            x: -100,
+            duration: 1.5,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".guests",
+                start: "top 80%",
+                toggleActions: "play none none none"
+            }
         });
 
         // Анимация для секций
-        gsap.utils.toArray(".info, .guests, .schedule, .collage, .contact").forEach(section => {
-            gsap.to(section, {
-                opacity: 1,
-                y: 0,
+        gsap.utils.toArray(".info, .schedule, .collage, .contact").forEach(section => {
+            gsap.from(section, {
+                opacity: 0,
+                y: 50,
                 duration: 1,
                 ease: "power3.out",
                 scrollTrigger: {
@@ -484,7 +546,15 @@
                 const targetId = this.getAttribute('href');
                 const targetElement = document.querySelector(targetId);
                 targetElement.scrollIntoView({ behavior: 'smooth' });
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.navbar ul').classList.remove('active');
+                }
             });
+        });
+
+        // Бургер-меню
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.navbar ul').classList.toggle('active');
         });
     </script>
 </body>
